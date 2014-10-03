@@ -1,5 +1,24 @@
 package wumpusworld;
 
+import alice.tuprolog.Int;
+import alice.tuprolog.InvalidTheoryException;
+import alice.tuprolog.MalformedGoalException;
+import alice.tuprolog.NoMoreSolutionException;
+import alice.tuprolog.NoSolutionException;
+import alice.tuprolog.Prolog;
+import alice.tuprolog.SolveInfo;
+import alice.tuprolog.Struct;
+import alice.tuprolog.Term;
+import alice.tuprolog.Theory;
+import alice.tuprolog.Var;
+import alice.tuprolog.event.OutputEvent;
+import alice.tuprolog.event.OutputListener;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * Contans starting code for creating your own Wumpus World agent.
  * Currently the agent only make a random decision each turn.
@@ -25,6 +44,44 @@ public class MyAgent implements Agent
      */
     public void doAction()
     {
+        Prolog engine = new Prolog();
+
+        String theory = " bigger(elephant, horse).\n"+
+                " bigger(horse, donkey).\n"+
+                " bigger(donkey, dog).\n"+
+                " bigger(donkey, monkey).\n"+
+                " bigger(monkey, ant).\n"+
+                " bigger(monkey, dog).\n"+
+                " bigger(giant_ant, elephant).\n"+
+                " is_bigger(X, Y) :- bigger(X, Y).\n" +
+                " is_bigger(X, Y) :- bigger(X, Z), is_bigger(Z, Y).\n";
+        try {
+            Theory t = new Theory(theory);
+            
+            Theory t2 = new Theory( MyAgent.class.getResourceAsStream("resources/KB.pl"));
+            engine.addTheory(t2);
+            
+            SolveInfo info = engine.solve("is_bigger(horse, X).");
+            
+            //System.out.println(info);
+            
+            while (info.isSuccess()){
+                System.out.println("solution: "+info.getSolution()+" - bindings: "+info);
+                if (engine.hasOpenAlternatives()){
+                    info=engine.solveNext();
+                } 
+                else {
+                    break;
+                }
+            }
+            
+            
+        } catch (InvalidTheoryException | MalformedGoalException | NoSolutionException | NoMoreSolutionException ex) {
+            Logger.getLogger(MyAgent.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(MyAgent.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         //Location of the player
         int cX = w.getPlayerX();
         int cY = w.getPlayerY();
