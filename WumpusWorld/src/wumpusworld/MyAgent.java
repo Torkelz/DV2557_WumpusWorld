@@ -23,7 +23,7 @@ import java.util.logging.Logger;
  * Contans starting code for creating your own Wumpus World agent.
  * Currently the agent only make a random decision each turn.
  * 
- * @author Johan Hagelbäck
+ * @author Johan HagelbÃ¤ck
  */
 public class MyAgent implements Agent
 {
@@ -46,24 +46,25 @@ public class MyAgent implements Agent
     {
         Prolog engine = new Prolog();
 
-        String theory = " bigger(elephant, horse).\n"+
-                " bigger(horse, donkey).\n"+
-                " bigger(donkey, dog).\n"+
-                " bigger(donkey, monkey).\n"+
-                " bigger(monkey, ant).\n"+
-                " bigger(monkey, dog).\n"+
-                " bigger(giant_ant, elephant).\n"+
-                " is_bigger(X, Y) :- bigger(X, Y).\n" +
-                " is_bigger(X, Y) :- bigger(X, Z), is_bigger(Z, Y).\n";
+        String theory = " stench(1, 2).\n"+
+                " stench(2, 1).\n"+
+                " breeze(1, 1).\n"+
+                " breeze(1, 4).\n";
+                
+        String theory2 = " has_stench(X, Y) :- stench(X, Y).\n" +
+                " has_stench(X, Y) :- stench(X, Z), has_stench(Z, Y).\n";
         try {
             Theory t = new Theory(theory);
+                        Theory t3 = new Theory(theory2);
+
             
             Theory t2 = new Theory( MyAgent.class.getResourceAsStream("resources/KB.pl"));
-            engine.addTheory(t2);
+            engine.addTheory(t);
+            engine.addTheory(t3);
+
+            SolveInfo info = engine.solve("has_stench(1, 2).");
             
-            SolveInfo info = engine.solve("is_bigger(horse, X).");
-            
-            //System.out.println(info);
+            System.out.println(info);
             
             while (info.isSuccess()){
                 System.out.println("solution: "+info.getSolution()+" - bindings: "+info);
