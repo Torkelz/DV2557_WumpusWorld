@@ -34,7 +34,14 @@ public class MyAgent implements Agent
      */
     public void doAction()
     {
-        int action = logicHelper.getMove(world);
+        String action = logicHelper.getMove(world);
+        
+        if(action.compareTo("") != 0){
+            world.doAction(action);
+            System.out.println("Our action is: " + action);
+            return;
+        }
+        
         //Location of the player
         int cX = world.getPlayerX();
         int cY = world.getPlayerY();
