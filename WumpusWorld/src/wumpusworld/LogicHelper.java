@@ -46,9 +46,22 @@ public class LogicHelper {
         addPerception(_world);
 
         try {
-            String s = "perception(X," + Integer.toString(x) + "," + Integer.toString(y) +").";
-
-            SolveInfo info = engine.solve(s);
+            //DEBUG
+            String s = engine.getTheory().toString();
+            SolveInfo info;
+            
+            info = engine.solve("has_glitter(" + Integer.toString(x) + "," + Integer.toString(y) +").");
+            if(yes(info.toString()))
+            {
+                return World.A_GRAB;
+            }
+            info = engine.solve("has_pit(" + Integer.toString(x) + "," + Integer.toString(y) +").");
+            if(yes(info.toString()) && _world.isInPit())
+            {
+                return World.A_CLIMB;
+            }
+            
+            info = engine.solve("perception(X," + Integer.toString(x) + "," + Integer.toString(y) +").");
             if(!yes(info.toString())){
                 System.out.println("Safe(" + x + "," +y +")");
                 
@@ -57,7 +70,7 @@ public class LogicHelper {
                     return World.A_MOVE;
                 }
                 else{
-                    //TUrn left
+                    /// Turn left
                     int dir = _world.getDirection();
                     dir--;
                     if(dir < 0) dir = 3;
@@ -65,7 +78,7 @@ public class LogicHelper {
                     if(_world.isValidPosition(c.x, c.y)){
                         return World.A_TURN_LEFT;
                     }
-                    //Turn Right
+                    /// Turn right
                     dir = _world.getDirection();
                     dir++;
                     if(dir > 3) dir = 0;
@@ -75,7 +88,8 @@ public class LogicHelper {
                     }                    
                 }
             }
-        } catch (Exception e) {
+        } 
+        catch (Exception e) {
             System.out.println("Error when checking for safe squares " + e.getMessage());
         }
         
@@ -156,6 +170,11 @@ public class LogicHelper {
                 if(!yes(info.toString())){
                     theory += s;
                 }
+            }
+            String s = PrologMap.VISITED.getEntry(x, y);
+            info = engine.solve(s);
+            if(!yes(info.toString())){
+                theory += s;
             }
         }
         catch (MalformedGoalException ex) {

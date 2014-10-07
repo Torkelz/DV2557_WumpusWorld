@@ -14,12 +14,12 @@ import alice.tuprolog.Theory;
  * @author Torkelz / Smurfa
  */
 public enum PrologMap {
-    BREEZE("perception(breeze,X,Y)."),
-    STENCH("perception(stench,X,Y)."),
-    GLITTER("perception(glitter,X,Y)."),
-    PIT("perception(pit,X,Y)."),
-    WUMPUS("perception(wumpus,X,Y)."),
-    VISITED("visited(X,Y).");
+    BREEZE("perception(breeze,X,Y).\n"),
+    STENCH("perception(stench,X,Y).\n"),
+    GLITTER("perception(glitter,X,Y).\n"),
+    PIT("perception(pit,X,Y).\n"),
+    WUMPUS("perception(wumpus,X,Y).\n"),
+    VISITED("visited(X,Y).\n");
     
     private String value;
     
