@@ -69,6 +69,10 @@ public class LogicHelper {
 
         try {
             //DEBUG
+            //engine.solve("add_stench([" + Integer.toString(2) + "," + Integer.toString(1) +"]).");
+            //engine.solve("add_stench([" + Integer.toString(3) + "," + Integer.toString(2) +"]).");
+            
+            
             String s = engine.getTheory().toString();
             SolveInfo info;
             
@@ -177,33 +181,14 @@ public class LogicHelper {
         try{
             SolveInfo info;
             if(_world.hasBreeze(x, y)){
-                String s = PrologMap.BREEZE.getEntry(x, y);
-                info = engine.solve(s);
-                if(!yes(info.toString())){
-                    theory += s;
-                }
+                theory += addRule(PrologMap.BREEZE, x, y, false);
             }
             else{
-                String s = PrologMap.BREEZE.getNotEntry(x, y);
-                info = engine.solve(s);
-                if(yes(info.toString())){
-                    theory += s;
-                }
+                theory += addRule(PrologMap.BREEZE, x, y, true);
             }
             if(_world.hasPit(x, y)){
-                String s = PrologMap.PIT.getEntry(x, y);
-                info = engine.solve(s);
-                if(!yes(info.toString())){
-                    theory += s;
-                }
+                theory += addRule(PrologMap.PIT, x, y, false);
             }
-//            else{
-//                String s = PrologMap.PIT.getNotEntry(x, y);
-//                info = engine.solve(s);
-//                if(yes(info.toString())){
-//                    theory += s;
-//                }
-//            }
             if(_world.hasStench(x, y)){
                 String s = PrologMap.STENCH.getEntry(x, y);
                 info = engine.solve(s);
@@ -211,43 +196,39 @@ public class LogicHelper {
                     //theory += s;
                     
                     engine.solve("add_stench([" + Integer.toString(x) + "," + Integer.toString(y) +"]).");
+                    
+                    String sd = engine.getTheory().toString();
+                    int dummy = 0;
                 }
             }
             else{
-                String s = PrologMap.STENCH.getNotEntry(x, y);
-                info = engine.solve(s);
-                if(yes(info.toString())){
-                    theory += s;
-                }
+                theory += addRule(PrologMap.STENCH, x, y, true);
             }
             if(_world.hasWumpus(x, y)){
-                String s = PrologMap.WUMPUS.getEntry(x, y);
-                info = engine.solve(s);
-                if(!yes(info.toString())){
-                    theory += s;
-                }
+                theory += addRule(PrologMap.WUMPUS, x, y, false);
             }
             if(_world.hasGlitter(x, y)){
-                String s = PrologMap.GLITTER.getEntry(x, y);
-                info = engine.solve(s);
-                if(!yes(info.toString())){
-                    theory += s;
-                }
+                theory += addRule(PrologMap.GLITTER, x, y, false);
             }
             String s = PrologMap.VISITED.getEntry(x, y);
             info = engine.solve(s);
             if(!yes(info.toString())){
-                theory += s;
+                //theory += s;
+
+                engine.solve("add_visited([" + Integer.toString(x) + "," + Integer.toString(y) +"]).");
+
+                String sd = engine.getTheory().toString();
+                int dummy = 0;
             }
         }
         catch (MalformedGoalException ex) {
-            Logger.getLogger(LogicHelper.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Error when checking for already existing entries in addPerception() " + ex.getMessage());
         }
         
         try {
             engine.addTheory(new Theory(theory));
         } catch (InvalidTheoryException ex) {
-            System.out.println("Error when adding theory in getMove() " + ex.getMessage());
+            System.out.println("Error when adding theory in addPerception() " + ex.getMessage());
         }
     }
     
@@ -272,5 +253,23 @@ public class LogicHelper {
             default:
                 return new coordinates();
         }
+    }
+    
+    private String addRule(PrologMap _entry, int _x, int _y, boolean _inverse) throws MalformedGoalException{
+        String s, t;
+        if(_inverse){
+            s = _entry.getNotEntry(_x, _y);
+            t = "not(" + _entry.getValue(_x, _y) + ")";
+        }
+        else{
+            s = _entry.getEntry(_x, _y);
+            t = _entry.getValue(_x, _y);
+        }
+        
+        SolveInfo info = engine.solve(s);
+        if(_inverse == yes(info.toString())){
+            engine.solve("asserta("+ t +").");
+        }
+        return "";
     }
 }

@@ -19,23 +19,23 @@ location_toward([X,Y],2,[X,New_Y]) :- New_Y is Y-1.
 %Misc rules
 %--------------------------------
 not(pit(X)) :- breeze(X).
+not(visited(X)) :- visited(X)-> false; true.
 perception(X) :- breeze(X).
 perception(X) :- stench(X).
-
-
-
-
 
 %--------------------------------
 %Handle wumpus logic
 %--------------------------------
 wumpus(X) :- not(visited(X)), location_toward(X,_,Z), stench(Z), inside_bounds(X), inside_bounds(Z).
 
-add_stench(X) :- assert(stench(X)), check_for_wumpus(X,0), check_for_wumpus(X,1), check_for_wumpus(X,2), check_for_wumpus(X,3).
+add_visited(X) :- asserta(visited(X)), retract(assume_wumpus(X)).
 
-check_for_wumpus(X,D) :- (not(wumpus_found) -> !), location_toward(X,D,Y), not(visited(Y)), inside_bounds(Y),
- (assume_wumpus(Y) -> (assert(wumpus_found), retractall(assume_wumpus(_)), assert(wumpus_pos(Y)) , !); assert(assume_wumpus(Y))).
+%add_stench(X) :- assert(stench(X)), check_for_wumpus(X,0), check_for_wumpus(X,1), check_for_wumpus(X,2), check_for_wumpus(X,3).
+add_stench(X) :- assert(stench(X)), check_for_wumpus(X,0), check_for_wumpus(X,1), check_for_wumpus(X,2), check_for_wumpus(X,3), !.
 
+check_for_wumpus(X,D) :- wumpus_found -> !,fail; location_toward(X,D,Y), not(visited(Y)), inside_bounds(Y),
+    (assume_wumpus(Y) -> (assert(wumpus_found), abolish(assume_wumpus(_))); asserta(assume_wumpus(Y))).
+%(assume_wumpus(Y) -> (assert(wumpus_found), abolish(assume_wumpus(_)), assert(wumpus_pos(Y))); 
 %--------------------------------
 %Dynamic variables
 %--------------------------------
@@ -43,6 +43,18 @@ check_for_wumpus(X,D) :- (not(wumpus_found) -> !), location_toward(X,D,Y), not(v
 :- dynamic(stench/1).
 :- dynamic(wumpus_found/0).
 :- dynamic(wumpus_pos/1).
+:- dynamic(visited/1).
+:- dynamic(breeze/1).
+
+
+%--------------------------------
+%Default values
+%--------------------------------
+stench(_) :- fail.
+breeze(_) :- fail.
+visited(_) :- fail.
+assume_wumpus(_) :- fail.
+
 
 
 %--------------------------------
