@@ -44,24 +44,64 @@ public class LogicHelper {
         int x = _world.getPlayerX();
         int y = _world.getPlayerY();
         addPerception(_world);
+        
+        int lookDirection = _world.getDirection();
+        int lookX = x;
+        int lookY = y;
+        switch (lookDirection){
+            case World.DIR_UP:{
+                ++lookY;
+                break;
+            }
+            case World.DIR_DOWN:{
+                --lookY;
+                break;
+                }
+            case World.DIR_LEFT:{
+                --lookX;
+                break;
+            }
+            case World.DIR_RIGHT:{
+                ++lookX;
+                break;
+            }
+        }
 
         try {
             //DEBUG
             String s = engine.getTheory().toString();
             SolveInfo info;
             
-            info = engine.solve("has_glitter(" + Integer.toString(x) + "," + Integer.toString(y) +").");
+            
+            info = engine.solve("wumpus(["+ Integer.toString(lookX) + "," + Integer.toString(lookY) + "]).");
+            if(yes(info.toString())){
+                String h = info.toString();
+                int erxtra = 0;
+            
+                while (info.isSuccess()){
+                    System.out.println("solution: "+info.getSolution()+" - bindings: "+info + "SOS: " + info.getSetOfSolution());
+                    System.out.println("Extra: "+info.getVarValue("Z"));
+                    if (engine.hasOpenAlternatives()){
+                        info=engine.solveNext();
+                    } 
+                    else {
+                        break;
+                    }
+                }
+            }
+            
+            info = engine.solve("glitter([" + Integer.toString(x) + "," + Integer.toString(y) +"]).");
             if(yes(info.toString()))
             {
                 return World.A_GRAB;
             }
-            info = engine.solve("has_pit(" + Integer.toString(x) + "," + Integer.toString(y) +").");
+            info = engine.solve("pit([" + Integer.toString(x) + "," + Integer.toString(y) +"]).");
             if(yes(info.toString()) && _world.isInPit())
             {
                 return World.A_CLIMB;
             }
             
-            info = engine.solve("perception(X," + Integer.toString(x) + "," + Integer.toString(y) +").");
+            info = engine.solve("perception(["+ Integer.toString(x) + "," + Integer.toString(y) + "]).");
             if(!yes(info.toString())){
                 System.out.println("Safe(" + x + "," +y +")");
                 
@@ -143,6 +183,13 @@ public class LogicHelper {
                     theory += s;
                 }
             }
+            else{
+                String s = PrologMap.BREEZE.getNotEntry(x, y);
+                info = engine.solve(s);
+                if(yes(info.toString())){
+                    theory += s;
+                }
+            }
             if(_world.hasPit(x, y)){
                 String s = PrologMap.PIT.getEntry(x, y);
                 info = engine.solve(s);
@@ -150,10 +197,26 @@ public class LogicHelper {
                     theory += s;
                 }
             }
+//            else{
+//                String s = PrologMap.PIT.getNotEntry(x, y);
+//                info = engine.solve(s);
+//                if(yes(info.toString())){
+//                    theory += s;
+//                }
+//            }
             if(_world.hasStench(x, y)){
                 String s = PrologMap.STENCH.getEntry(x, y);
                 info = engine.solve(s);
                 if(!yes(info.toString())){
+                    //theory += s;
+                    
+                    engine.solve("add_stench([" + Integer.toString(x) + "," + Integer.toString(y) +"]).");
+                }
+            }
+            else{
+                String s = PrologMap.STENCH.getNotEntry(x, y);
+                info = engine.solve(s);
+                if(yes(info.toString())){
                     theory += s;
                 }
             }

@@ -14,12 +14,12 @@ import alice.tuprolog.Theory;
  * @author Torkelz / Smurfa
  */
 public enum PrologMap {
-    BREEZE("perception(breeze,X,Y).\n"),
-    STENCH("perception(stench,X,Y).\n"),
-    GLITTER("perception(glitter,X,Y).\n"),
-    PIT("perception(pit,X,Y).\n"),
-    WUMPUS("perception(wumpus,X,Y).\n"),
-    VISITED("visited(X,Y).\n");
+    BREEZE("breeze([X,Y])"),
+    STENCH("stench([X,Y])"),
+    GLITTER("glitter([X,Y])"),
+    PIT("pit([X,Y])"),
+    WUMPUS("wumpus([X,Y])"),
+    VISITED("visited([X,Y])");
     
     private String value;
     
@@ -31,7 +31,13 @@ public enum PrologMap {
         String s;
         s = value.replace("X", Integer.toString(x));
         s = s.replace("Y", Integer.toString(y));
-        return s;
+        return s + ".\n";
+    }
+    public String getNotEntry(int x, int y){
+        String s;
+        s = value.replace("X", Integer.toString(x));
+        s = s.replace("Y", Integer.toString(y));
+        return "not(" + s + ").\n";
     }
     
     public String getValue(){
