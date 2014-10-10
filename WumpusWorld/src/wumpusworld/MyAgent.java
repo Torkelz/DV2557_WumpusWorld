@@ -2,6 +2,8 @@ package wumpusworld;
 
 import alice.tuprolog.InvalidTheoryException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Contans starting code for creating your own Wumpus World agent.
@@ -11,8 +13,31 @@ import java.io.IOException;
  */
 public class MyAgent implements Agent
 {
+    class coordinates{
+        int x;
+        int y;
+        public coordinates(){
+            this.x = 0;
+            this.y = 0;
+        }
+        public coordinates(int _x, int _y){
+            this.x = _x;
+            this.y = _y;
+        }
+        
+        public boolean compare(coordinates _c){
+            if(x == _c.x && y == _c.y)
+                return true;
+            else
+                return false;
+        }
+    }
+    
     private World world;
+    private List<coordinates> visited = new ArrayList<>();
     //private LogicHelper logicHelper;
+    private boolean foundWumpus = false;
+    private coordinates wumpusCoordinates;
     
     /**
      * Creates a new instance of your solver agent.
@@ -45,6 +70,12 @@ public class MyAgent implements Agent
         //Location of the player
         int cX = world.getPlayerX();
         int cY = world.getPlayerY();
+        coordinates c = new coordinates(cX, cY);
+        
+        
+        if(!isVisited(c)){
+            visited.add(c);
+        }
         
         //Basic action:
         //Grab Gold if we can.
@@ -91,23 +122,182 @@ public class MyAgent implements Agent
         {
             System.out.println("I am facing Down");
         }
+        int newX = world.getPlayerX();
+        int newY = world.getPlayerY();
+        switch(world.getDirection()){
+            case World.DIR_DOWN:
+                newY--;
+                break;
+            case World.DIR_LEFT:
+                newX--;
+                break;
+            case World.DIR_RIGHT:
+                newX++;
+                break;
+            case World.DIR_UP:
+                newY++;
+                break;
+        }
         
-        //Random move actions
-        int rnd = (int)(Math.random() * 5);
-        if (rnd == 0) 
-        {
-            world.doAction(World.A_TURN_LEFT);
+        if(wall())
             return;
-        }
-        if (rnd == 1)
-        {
-            world.doAction(World.A_TURN_RIGHT);
-            return;
-        }
-        if (rnd >= 2)
+
+        
+        if(isSafe(cX, cY, newX, newY) || (world.isVisited(newX, newY) && !world.hasBreeze(newX, newY) && !world.hasStench(newX, newY)))
         {
             world.doAction(World.A_MOVE);
             return;
         }
+        else{
+            
+            
+            return;
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        //Random move actions
+//        int rnd = (int)(Math.random() * 5);
+//        if (rnd == 0) 
+//        {
+//            world.doAction(World.A_TURN_LEFT);
+//            return;
+//        }
+//        if (rnd == 1)
+//        {
+//            world.doAction(World.A_TURN_RIGHT);
+//            return;
+//        }
+//        if (rnd >= 2)
+//        {
+//            world.doAction(World.A_MOVE);
+//            return;
+//        }
+    }
+    
+    private boolean isSafe(int _cX, int _cY, int _nX, int _nY){
+        if(!world.hasBreeze(_cX, _cY) && !world.hasStench(_cX, _cY))
+            return true;
+        
+        return false;
+    }
+    
+    private boolean isVisited(coordinates c){
+        for (coordinates v : visited) {
+            if(c.compare(v))
+                return true;
+        }
+        return false;
+    }
+    
+    private boolean wall(){
+        int newX = world.getPlayerX();
+        int newY = world.getPlayerY();
+        switch(world.getDirection()){
+            case World.DIR_DOWN:
+                newY--;
+                break;
+            case World.DIR_LEFT:
+                newX--;
+                break;
+            case World.DIR_RIGHT:
+                newX++;
+                break;
+            case World.DIR_UP:
+                newY++;
+                break;
+        }
+        if(!world.isValidPosition(newX, newY)){
+            
+            int lX = world.getPlayerX();
+            int lY = world.getPlayerY();
+            int direction = world.getDirection() + 1;
+            if(direction > 3)
+                direction = 0;
+            switch(direction){
+                case World.DIR_DOWN:
+                    lY--;
+                    break;
+                case World.DIR_LEFT:
+                    lX--;
+                    break;
+                case World.DIR_RIGHT:
+                    lX++;
+                    break;
+                case World.DIR_UP:
+                    lY++;
+                    break;
+            }
+            if(world.isValidPosition(lX, lY)){
+                world.doAction(World.A_TURN_RIGHT);
+                return true;
+            }
+//            lX = world.getPlayerX();
+//            lY = world.getPlayerY();
+//            direction = world.getDirection() - 1;
+//            if(direction < 0)
+//                direction = 3;
+//            switch(direction){
+//                case World.DIR_DOWN:
+//                    lY--;
+//                    break;
+//                case World.DIR_LEFT:
+//                    lX--;
+//                    break;
+//                case World.DIR_RIGHT:
+//                    lX++;
+//                    break;
+//                case World.DIR_UP:
+//                    lY++;
+//                    break;
+//            }
+//            if(world.isValidPosition(lX, lY)){
+                world.doAction(World.A_TURN_LEFT);
+                return true;
+            //}
+        }
+        return false;
+    }
+    
+    private void determineWumpus(){
+        if(!foundWumpus){
+            List<coordinates> stenches = new ArrayList<>();
+            for (coordinates v : visited) {
+                if(world.hasBreeze(v.x, v.y))
+                    stenches.add(v);
+            }
+            List<coordinates> validWumpusSpots = new ArrayList<>();
+            
+            for (coordinates v : stenches) {
+                List<coordinates> surrounding = getSurroundingSquares(v);
+                
+                
+            }
+        }
+    }
+    private List<coordinates> getSurroundingSquares(coordinates c){
+        List<coordinates> list = new ArrayList<>();
+        
+        if(world.isValidPosition(c.x + 1, c.y))
+            list.add(new coordinates(c.x + 1, c.y));
+        if(world.isValidPosition(c.x - 1, c.y))
+            list.add(new coordinates(c.x - 1, c.y));
+        if(world.isValidPosition(c.x, c.y + 1))
+            list.add(new coordinates(c.x, c.y + 1));
+        if(world.isValidPosition(c.x, c.y - 1))
+            list.add(new coordinates(c.x, c.y - 1));       
+        return list;
     }
 }
