@@ -182,9 +182,14 @@ public class LogicHelper {
             SolveInfo info;
             if(_world.hasBreeze(x, y)){
                 theory += addRule(PrologMap.BREEZE, x, y, false);
+                //String ttt = PrologMap.BREEZE.addEntry(x, y);
+                //engine.solve(PrologMap.BREEZE.addEntry(x, y));
             }
             else{
                 theory += addRule(PrologMap.BREEZE, x, y, true);
+                //String ttt = PrologMap.BREEZE.addNotEntry(x, y);
+                //engine.solve(ttt);
+
             }
             if(_world.hasPit(x, y)){
                 theory += addRule(PrologMap.PIT, x, y, false);

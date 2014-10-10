@@ -18,8 +18,9 @@ location_toward([X,Y],2,[X,New_Y]) :- New_Y is Y-1.
 %--------------------------------
 %Misc rules
 %--------------------------------
-not(pit(X)) :- breeze(X).
-not(visited(X)) :- visited(X)-> false; true.
+%not(breeze(X)) :- visited(X)
+%not(pit(X)) :- breeze(X).
+%not(visited(X)) :- visited(X)-> false; true.
 perception(X) :- breeze(X).
 perception(X) :- stench(X).
 
@@ -36,6 +37,13 @@ add_stench(X) :- assert(stench(X)), check_for_wumpus(X,0), check_for_wumpus(X,1)
 check_for_wumpus(X,D) :- wumpus_found -> !,fail; location_toward(X,D,Y), not(visited(Y)), inside_bounds(Y),
     (assume_wumpus(Y) -> (assert(wumpus_found), abolish(assume_wumpus(_))); asserta(assume_wumpus(Y))).
 %(assume_wumpus(Y) -> (assert(wumpus_found), abolish(assume_wumpus(_)), assert(wumpus_pos(Y))); 
+
+
+%--------------------------------
+%Handle pit logic
+%--------------------------------
+breeze(X) :- location_toward(X,_,Y), pit(Y).
+
 %--------------------------------
 %Dynamic variables
 %--------------------------------
@@ -55,6 +63,21 @@ breeze(_) :- fail.
 visited(_) :- fail.
 assume_wumpus(_) :- fail.
 
+%--------------------------------
+%Set functions
+%--------------------------------
+add_breeze(X) :- (inside_bounds(X), breeze(X)) ; asserta(breeze(X)).
+add_glitter(X) :- (inside_bounds(X), glitter(X)) ; asserta(glitter(X)).
+add_visited(X) :- (inside_bounds(X), visited(X)) ; asserta(visited(X)).
+add_pit(X) :- (inside_bounds(X), pit(X)) ; asserta(pit(X)).
+
+%--------------------------------
+%Set not functions
+%--------------------------------
+add_not_breeze(X) :- (inside_bounds(X), not(breeze(X))) ; asserta(not(breeze(X))).
+add_not_glitter(X) :- (inside_bounds(X), not(glitter(X))) ; asserta(not(glitter(X))).
+add_not_visited(X) :- (inside_bounds(X), not(visited(X))) ; asserta(not(visited(X))).
+add_not_pit(X) :- (inside_bounds(X), not(pit(X))) ; asserta(not(pit(X))).
 
 
 %--------------------------------
