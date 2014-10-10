@@ -273,4 +273,13 @@ public class LogicHelper {
                 return new coordinates();
         }
     }
+    
+//    public List<coordinates> getAllPerceptions(PrologMap _perception) throws MalformedGoalException{
+//        List<coordinates> list = new ArrayList<>();
+//        
+//        SolveInfo solve = engine.solve(_perception.getAll());
+//        while(solve.isSuccess()){
+//            
+//        }        
+//    }
 }

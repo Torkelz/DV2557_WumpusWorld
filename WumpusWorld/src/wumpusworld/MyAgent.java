@@ -12,7 +12,7 @@ import java.io.IOException;
 public class MyAgent implements Agent
 {
     private World world;
-    private LogicHelper logicHelper;
+    //private LogicHelper logicHelper;
     
     /**
      * Creates a new instance of your solver agent.
@@ -21,11 +21,11 @@ public class MyAgent implements Agent
      */
     public MyAgent(World _world)
     {
-        try {
-            this.logicHelper = new LogicHelper();
-        } catch (InvalidTheoryException | IOException ex) {
-            System.out.println("Error when creating logichelper" + ex.getMessage());
-        }
+//        try {
+//            this.logicHelper = new LogicHelper();
+//        } catch (InvalidTheoryException | IOException ex) {
+//            System.out.println("Error when creating logichelper" + ex.getMessage());
+//        }
         this.world = _world;
     }
     
@@ -34,13 +34,13 @@ public class MyAgent implements Agent
      */
     public void doAction()
     {
-        String action = logicHelper.getMove(world);
+        //String action = logicHelper.getMove(world);
         
-        if(action.compareTo("") != 0){
-            world.doAction(action);
-            System.out.println("Our action is: " + action);
-            return;
-        }
+//        if(action.compareTo("") != 0){
+//            world.doAction(action);
+//            System.out.println("Our action is: " + action);
+//            return;
+//        }
         
         //Location of the player
         int cX = world.getPlayerX();

@@ -44,6 +44,12 @@ public enum PrologMap {
         return value;
     }
     
+    public String getAll(){
+        String s;
+        s = value.replace("[X,Y]", "X");
+        return s + ".\n";
+    }
+    
     public Theory getTheory() throws InvalidTheoryException{
         return new Theory(value);
     }
