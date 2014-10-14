@@ -20,10 +20,25 @@ public class HelperFunctions {
         this.world = _world;
     }
     
-    public boolean isSafe(int _cX, int _cY, int _nX, int _nY){
-        if(!world.hasBreeze(_cX, _cY) && !world.hasStench(_cX, _cY)){
+    public boolean isSafe(Coordinate _current){
+        if(!world.hasBreeze(_current.x, _current.y) && !world.hasStench(_current.x, _current.y)){
             return true;
         }        
+        return false;
+    }
+    
+    public boolean safeStench(Coordinate _current, Coordinate _wumpus,  boolean _wumpusFound){
+        if (_wumpusFound && _current.compare(_wumpus)){
+            return false;
+        }
+        else if (!_wumpusFound)
+        {
+            return false;
+        }
+        return true;
+    }
+    
+    public boolean safeBreeze(Coordinate _current){
         return false;
     }
     
@@ -35,55 +50,60 @@ public class HelperFunctions {
         return false;
     }
     
-    public boolean isTurnLeftValid(int _x, int _y, int _dir){
+    public boolean isTurnLeftValid(Coordinate _current, int _dir){
         _dir--;
+        int x = _current.x;
+        int y = _current.y;
         if(_dir < 0)
             _dir = 3;
         switch(_dir){
             case World.DIR_DOWN:
-                _y--;
+                y--;
                 break;
             case World.DIR_LEFT:
-                _x--;
+                x--;
                 break;
             case World.DIR_RIGHT:
-                _x++;
+                x++;
                 break;
             case World.DIR_UP:
-                _y++;
+                y++;
                 break;
         }
-        if(world.isValidPosition(_x, _y)){
+        if(world.isValidPosition(x, y)){
             return true;
         }
         return false;
     }
     
-    public boolean isTurnRightValid(int _x, int _y, int _dir){
+    public boolean isTurnRightValid(Coordinate _current, int _dir){
         _dir++;
+        int x = _current.x;
+        int y = _current.y;
         if(_dir > 3)
             _dir = 0;
         switch(_dir){
             case World.DIR_DOWN:
-                _y--;
+                y--;
                 break;
             case World.DIR_LEFT:
-                _x--;
+                x--;
                 break;
             case World.DIR_RIGHT:
-                _x++;
+                x++;
                 break;
             case World.DIR_UP:
-                _y++;
+                y++;
                 break;
         }
-        if(world.isValidPosition(_x, _y)){
+        if(world.isValidPosition(x, y)){
             return true;
         }
         return false;
     }
         
     public boolean wall(){
+        Coordinate playerPosition = new Coordinate(world.getPlayerX(), world.getPlayerY());
         int newX = world.getPlayerX();
         int newY = world.getPlayerY();
         switch(world.getDirection()){
@@ -101,7 +121,7 @@ public class HelperFunctions {
                 break;
         }
         if(!world.isValidPosition(newX, newY)){
-            if(isTurnRightValid(world.getPlayerX(), world.getPlayerY(), world.getDirection())){
+            if(isTurnRightValid(playerPosition, world.getDirection())){
                 world.doAction(World.A_TURN_RIGHT);
                 return true;
             }
@@ -125,7 +145,7 @@ public class HelperFunctions {
             //Get surrounding squares for each stench
             List<Coordinate> surrounding = getSurroundingSquares(v);
             for (Coordinate u : surrounding) {
-                //If visites it's assumed to be safe.
+                //If visited it's assumed to be safe.
                 if(world.isVisited(u.x, u.y)){
                     continue;
                 }
@@ -145,7 +165,7 @@ public class HelperFunctions {
                 validWumpusSpots.add(entry.getKey());
         }
 
-        //one common square -> wumpus found.
+        //One common square -> wumpus found.
         if(validWumpusSpots.size() == 1){
             return validWumpusSpots.get(0);
         }

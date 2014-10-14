@@ -13,6 +13,8 @@ public class MyAgent implements Agent
 {    
     private World world;
     private List<Coordinate> visited = new ArrayList<>();
+    private List<Coordinate> visitedNeighbours = new ArrayList<>();
+    private List<Coordinate> safeNeighbours = new ArrayList<>();
     private boolean foundWumpus = false;
     private Coordinate wumpusCoordinates;
     private HelperFunctions helper;
@@ -32,15 +34,56 @@ public class MyAgent implements Agent
      * Asks your solver agent to execute an action.
      */
     public void doAction()
-    {        
+    {
+        safeNeighbours.clear();
+        visitedNeighbours.clear();
+        
         //Location of the player
         int cX = world.getPlayerX();
         int cY = world.getPlayerY();
-        Coordinate c = new Coordinate(cX, cY);
+        Coordinate current = new Coordinate(cX, cY);
         
+        if(!foundWumpus){
+            Coordinate ret = helper.determineWumpus(visited);
+            if(!ret.compare(new Coordinate(-1, -1))){
+                foundWumpus = true;
+                wumpusCoordinates = ret;
+            }
+        }
         
-        if(!helper.isVisited(c, visited)){
-            visited.add(c);
+        if(!helper.isVisited(current, visited)){
+            visited.add(current);
+        }
+        for (Coordinate c : visited){
+            List<Coordinate> neighbours = helper.getSurroundingSquares(c);
+            for (Coordinate n : neighbours){
+                if (world.isUnknown(n.x, n.y) ){
+                    if(!visitedNeighbours.contains(n)){
+                        visitedNeighbours.add(n);
+                    }
+                    
+                    //Only stench
+                    if(world.hasStench(c.x, c.y) && !world.hasBreeze(c.x, c.y)){
+                        if (helper.safeStench(n, wumpusCoordinates, foundWumpus) &&
+                                !safeNeighbours.contains(n)){
+                            safeNeighbours.add(n);
+                        }
+                    }
+                    //Only breeze
+                    else if(world.hasBreeze(c.x, c.y) && !world.hasStench(c.x, c.y)){
+                        if (helper.safeBreeze(c) &&
+                                !safeNeighbours.contains(n)){
+                            safeNeighbours.add(n);
+                        }
+                    }
+                    else if(!helper.isSafe(c)){ //Has both breeze and stench
+
+                    }
+                    else{ //Empty square
+                        safeNeighbours.add(n);
+                    }
+                }
+            }
         }
         
         //Basic action:
@@ -76,7 +119,7 @@ public class MyAgent implements Agent
                 break;
         }
         
-        if(helper.isSafe(cX, cY, newX, newY) || world.isVisited(newX, newY))
+        if(helper.isSafe(current) || world.isVisited(newX, newY))
         {
             if(!world.isValidPosition(newX, newY)){
                  if(helper.wall())
@@ -87,11 +130,7 @@ public class MyAgent implements Agent
             return;
         }
         else if(world.hasStench(cX, cY) || world.hasBreeze(cX, cY)){
-            Coordinate ret = helper.determineWumpus(visited);
-            if(!ret.compare(new Coordinate(-1, -1))){
-                foundWumpus = true;
-                wumpusCoordinates = ret;
-            }
+                       
             
             if(foundWumpus && !world.hasBreeze(cX, cY)){
                 //wumpus has been found and there's no breeze to worry about.
