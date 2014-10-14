@@ -65,7 +65,7 @@ public class MyAgent implements Agent
         }
         
         if(visited.size() > 4){
-            helper.goTo(new Coordinate(3,1), current, 1, visited);
+            helper.goTo(new Coordinate(3,1), current, world.getDirection(), visited);
         }
         
         
