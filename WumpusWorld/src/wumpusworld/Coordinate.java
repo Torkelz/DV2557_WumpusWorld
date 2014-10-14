@@ -16,11 +16,17 @@ public class Coordinate {
         this.x = 0;
         this.y = 0;
     }
+    
     public Coordinate(int _x, int _y){
         this.x = _x;
         this.y = _y;
     }
-
+    
+    public Coordinate(Coordinate _copy){
+        this.x = _copy.x;
+        this.y = _copy.y;
+    }
+    
     public boolean compare(Coordinate _c){
         if(x == _c.x && y == _c.y)
             return true;

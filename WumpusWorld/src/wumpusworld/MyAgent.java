@@ -15,6 +15,7 @@ public class MyAgent implements Agent
     private List<Coordinate> visited = new ArrayList<>();
     private List<Coordinate> visitedNeighbours = new ArrayList<>();
     private List<Coordinate> safeNeighbours = new ArrayList<>();
+    private List<String> actionQueue = new ArrayList<>();
     private boolean foundWumpus = false;
     private Coordinate wumpusCoordinates;
     private HelperFunctions helper;
@@ -35,14 +36,41 @@ public class MyAgent implements Agent
      */
     public void doAction()
     {
-        safeNeighbours.clear();
-        visitedNeighbours.clear();
-        
         //Location of the player
         int cX = world.getPlayerX();
         int cY = world.getPlayerY();
         Coordinate current = new Coordinate(cX, cY);
         
+        //Basic action:
+        //Grab Gold if we can.
+        if (world.hasGlitter(cX, cY))
+        {
+            world.doAction(World.A_GRAB);
+            return;
+        }
+        
+        //Basic action:
+        //We are in a pit. Climb up.
+        if (world.isInPit())
+        {
+            world.doAction(World.A_CLIMB);
+            return;
+        }
+        
+        //
+        if (!actionQueue.isEmpty()){
+            world.doAction(actionQueue.get(0));
+            actionQueue.remove(0);
+            return;
+        }
+        
+        if(visited.size() > 4){
+            helper.goTo(new Coordinate(3,1), current, 1, visited);
+        }
+        
+        
+        safeNeighbours.clear();
+        visitedNeighbours.clear();
         if(!foundWumpus){
             Coordinate ret = helper.determineWumpus(visited);
             if(!ret.compare(new Coordinate(-1, -1))){
@@ -86,62 +114,55 @@ public class MyAgent implements Agent
             }
         }
         
-        //Basic action:
-        //Grab Gold if we can.
-        if (world.hasGlitter(cX, cY))
-        {
-            world.doAction(World.A_GRAB);
-            return;
-        }
         
-        //Basic action:
-        //We are in a pit. Climb up.
-        if (world.isInPit())
-        {
-            world.doAction(World.A_CLIMB);
-            return;
-        }
         
         int newX = world.getPlayerX();
         int newY = world.getPlayerY();
         switch(world.getDirection()){
-            case World.DIR_DOWN:
+            case World.DIR_DOWN:{
                 newY--;
                 break;
-            case World.DIR_LEFT:
+            }
+            case World.DIR_LEFT:{
                 newX--;
                 break;
-            case World.DIR_RIGHT:
+            }
+            case World.DIR_RIGHT:{
                 newX++;
                 break;
-            case World.DIR_UP:
+            }
+            case World.DIR_UP:{
                 newY++;
                 break;
+            }
         }
         
         if(helper.isSafe(current) || world.isVisited(newX, newY))
         {
             if(!world.isValidPosition(newX, newY)){
-                 if(helper.wall())
+                 if(helper.wall()){
                     return;
+                 }
             }
-                
             world.doAction(World.A_MOVE);
             return;
         }
         else if(world.hasStench(cX, cY) || world.hasBreeze(cX, cY)){
-                       
             
             if(foundWumpus && !world.hasBreeze(cX, cY)){
                 //wumpus has been found and there's no breeze to worry about.
                 Coordinate n = new Coordinate(newX, newY);
-                if(!n.compare(new Coordinate(cX, cY))){
+                if(!n.compare(wumpusCoordinates)){
                     //Wumpus is not infront of us.
                     world.doAction(World.A_MOVE);
                     return;
                 }
                 else{
-                    //Wumpus is infront of us.
+                    //Wumpus is infront of us and no safe alternatives but shooting is left.
+                    if(safeNeighbours.isEmpty()){
+                        world.doAction(World.A_SHOOT);
+                        world.doAction(World.A_MOVE);
+                    }
                 }   
             }
             else{
