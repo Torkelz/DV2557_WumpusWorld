@@ -37,13 +37,11 @@ public class MyAgent implements Agent
     public void doAction()
     {
         //Location of the player
-        int cX = world.getPlayerX();
-        int cY = world.getPlayerY();
-        Coordinate current = new Coordinate(cX, cY);
+        Coordinate current = new Coordinate(world.getPlayerX(), world.getPlayerY());
         
         //Basic action:
         //Grab Gold if we can.
-        if (world.hasGlitter(cX, cY))
+        if (world.hasGlitter(current.x, current.y))
         {
             world.doAction(World.A_GRAB);
             return;
@@ -114,32 +112,12 @@ public class MyAgent implements Agent
             }
         }
         
+        //Get target coordinate.
+        Coordinate newC = helper.getFacingCoordinate(current, world.getDirection());
         
-        
-        int newX = world.getPlayerX();
-        int newY = world.getPlayerY();
-        switch(world.getDirection()){
-            case World.DIR_DOWN:{
-                newY--;
-                break;
-            }
-            case World.DIR_LEFT:{
-                newX--;
-                break;
-            }
-            case World.DIR_RIGHT:{
-                newX++;
-                break;
-            }
-            case World.DIR_UP:{
-                newY++;
-                break;
-            }
-        }
-        
-        if(helper.isSafe(current) || world.isVisited(newX, newY))
+        if(helper.isSafe(current) || world.isVisited(newC.x, newC.y))
         {
-            if(!world.isValidPosition(newX, newY)){
+            if(!world.isValidPosition(newC.x, newC.y)){
                  if(helper.wall()){
                     return;
                  }
@@ -147,12 +125,11 @@ public class MyAgent implements Agent
             world.doAction(World.A_MOVE);
             return;
         }
-        else if(world.hasStench(cX, cY) || world.hasBreeze(cX, cY)){
+        else if(world.hasStench(current.x, current.y) || world.hasBreeze(current.x, current.y)){
             
-            if(foundWumpus && !world.hasBreeze(cX, cY)){
+            if(foundWumpus && !world.hasBreeze(current.x, current.y)){
                 //wumpus has been found and there's no breeze to worry about.
-                Coordinate n = new Coordinate(newX, newY);
-                if(!n.compare(wumpusCoordinates)){
+                if(!newC.compare(wumpusCoordinates)){
                     //Wumpus is not infront of us.
                     world.doAction(World.A_MOVE);
                     return;
@@ -177,7 +154,5 @@ public class MyAgent implements Agent
         else{
             return;
         }
-        
-        
     }
 }
