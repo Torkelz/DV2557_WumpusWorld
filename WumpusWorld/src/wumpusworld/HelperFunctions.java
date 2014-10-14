@@ -5,7 +5,6 @@
  */
 package wumpusworld;
 
-import com.sun.corba.se.impl.orbutil.graph.Graph;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,6 +17,11 @@ import java.util.Map;
  * @author Torkelz
  */
 public class HelperFunctions {
+    private class retValues{
+        public List<String> actions;
+        public int currentDir;
+    }
+    
     private World world;
     public HelperFunctions(World _world){
         this.world = _world;
@@ -54,26 +58,12 @@ public class HelperFunctions {
     }
     
     public boolean isTurnLeftValid(Coordinate _current, int _dir){
-        _dir--;
-        int x = _current.x;
-        int y = _current.y;
+        _dir--;        
         if(_dir < 0)
             _dir = 3;
-        switch(_dir){
-            case World.DIR_DOWN:
-                y--;
-                break;
-            case World.DIR_LEFT:
-                x--;
-                break;
-            case World.DIR_RIGHT:
-                x++;
-                break;
-            case World.DIR_UP:
-                y++;
-                break;
-        }
-        if(world.isValidPosition(x, y)){
+        Coordinate n = getFacingCoordinate(_current, _dir);
+
+        if(world.isValidPosition(n.x, n.y)){
             return true;
         }
         return false;
@@ -81,25 +71,11 @@ public class HelperFunctions {
     
     public boolean isTurnRightValid(Coordinate _current, int _dir){
         _dir++;
-        int x = _current.x;
-        int y = _current.y;
         if(_dir > 3)
             _dir = 0;
-        switch(_dir){
-            case World.DIR_DOWN:
-                y--;
-                break;
-            case World.DIR_LEFT:
-                x--;
-                break;
-            case World.DIR_RIGHT:
-                x++;
-                break;
-            case World.DIR_UP:
-                y++;
-                break;
-        }
-        if(world.isValidPosition(x, y)){
+        Coordinate n = getFacingCoordinate(_current, _dir);
+        
+        if(world.isValidPosition(n.x, n.y)){
             return true;
         }
         return false;
@@ -107,23 +83,9 @@ public class HelperFunctions {
         
     public boolean wall(){
         Coordinate playerPosition = new Coordinate(world.getPlayerX(), world.getPlayerY());
-        int newX = world.getPlayerX();
-        int newY = world.getPlayerY();
-        switch(world.getDirection()){
-            case World.DIR_DOWN:
-                newY--;
-                break;
-            case World.DIR_LEFT:
-                newX--;
-                break;
-            case World.DIR_RIGHT:
-                newX++;
-                break;
-            case World.DIR_UP:
-                newY++;
-                break;
-        }
-        if(!world.isValidPosition(newX, newY)){
+        Coordinate c = getFacingCoordinate(playerPosition, world.getDirection());
+        
+        if(!world.isValidPosition(c.x, c.y)){
             if(isTurnRightValid(playerPosition, world.getDirection())){
                 world.doAction(World.A_TURN_RIGHT);
                 return true;
@@ -218,9 +180,13 @@ public class HelperFunctions {
         List<Node> openList = new ArrayList<>();
         List<Node> closedList = new ArrayList<>();
         Node startNode = null;
+        Node targetNode = null;
+
         for(Node n : grid){
             if(n.equals(new Node(_playerPos)))
                 startNode = n;
+            if(n.equals(new Node(_target)))
+                targetNode = n;
         }
         openList.add(startNode);
         Map<Node, Node> path = new HashMap<>();
@@ -229,8 +195,8 @@ public class HelperFunctions {
             openList.remove(0);
             
             if (c.coordinate.compare(_target)){
-                //return path(path, destination)
-                int dummy = 0;
+                return actions(path, targetNode,startNode, _direction);
+                //int dummy = 0;
             }
             closedList.add(c);
             
@@ -253,103 +219,95 @@ public class HelperFunctions {
             }
             Collections.sort(openList, DISTANCE);
         }
-        
-        
-        
         return actions;
     }
     
-    private List<String> actions(Map<Node, Node> _path, Node _target, int _playerDirection){
+    private List<String> actions(Map<Node, Node> _path, Node _target, Node _start, int _playerDirection){
         List<String> actions = new ArrayList<>();
-        
-        actions.add(World.A_MOVE);
+        List<Coordinate> coords = new ArrayList<>();
+        //Get the path coordinates
         while(_path.containsKey(_target)){
-            Coordinate prev = _target.coordinate;
+            coords.add(_target.coordinate);
             _target = _path.get(_target);
-            
-            List<String> turns = turnTo(prev, _target.coordinate, _playerDirection);
-            if(!turns.isEmpty()){
-                if(turns.get(0) == "l"){
-                    for(String s : turns){
-                        _playerDirection--;
-                        if(_playerDirection < 0)
-                            _playerDirection = 3;                                
-                    }
-                }
-                else{
-                    for(String s : turns){
-                        _playerDirection++;
-                        if(_playerDirection > 3)
-                            _playerDirection = 0;                                
-                    }
-                }
-                actions.addAll(turns);
-            }
         }
-        Collections.reverse(actions);
+        Collections.reverse(coords);
+        
+        //Create a actionlist
+        Coordinate start = _start.coordinate;
+        for(Coordinate c : coords){
+            
+            if(!getFacingCoordinate(start, _playerDirection).compare(c)){
+                retValues ret = turnTo(start, c, _playerDirection);
+                _playerDirection = ret.currentDir;
+                actions.addAll(ret.actions);
+                
+            }
+            actions.add(World.A_MOVE);
+            start = c;
+        }
         return actions;
     }
     
-    private List<String> turnTo(Coordinate _start, Coordinate _end, int _playerDireciton){
+    private retValues turnTo(Coordinate _start, Coordinate _end, int _playerDireciton){
         int startDir = _playerDireciton;
         
-        int nrLeft = 0;
-        for(int i = 0; i < 3; i++){
-            int newX = _start.x;
-            int newY = _start.y;
-            nrLeft++;
-            startDir--;
-            if(startDir < 0)
-                startDir = 3;            
-            switch(startDir){
-                case World.DIR_DOWN:
-                    newY--;
-                    break;
-                case World.DIR_LEFT:
-                    newX--;
-                    break;
-                case World.DIR_RIGHT:
-                    newX++;
-                    break;
-                case World.DIR_UP:
-                    newY++;
-                    break;
-            }
-            if(_end.compare(new Coordinate(newX, newY)))
-                break;
-        }
-        int nrRight = 0;
-        startDir = _playerDireciton;
-
-        for(int i = 0; i < 3; i++){
-            int newX = _start.x;
-            int newY = _start.y;
-            nrRight++;
-            startDir++;
-            if(startDir > 3)
-                startDir = 0;            
-            switch(startDir){
-                case World.DIR_DOWN:
-                    newY--;
-                    break;
-                case World.DIR_LEFT:
-                    newX--;
-                    break;
-                case World.DIR_RIGHT:
-                    newX++;
-                    break;
-                case World.DIR_UP:
-                    newY++;
-                    break;
-            }
-            if(_end.compare(new Coordinate(newX, newY)))
-                break;
-        }
+        startDir--;
+        if(startDir < 0)
+            startDir = 3;
         
-        if(nrLeft < nrRight)
-            return new ArrayList<>(Collections.nCopies(nrLeft, World.A_TURN_LEFT));
-        else
-            return new ArrayList<>(Collections.nCopies(nrLeft, World.A_TURN_RIGHT));
+        Coordinate n = getFacingCoordinate(_start, startDir);
+        startDir++;
+        if(startDir > 3)
+            startDir = 0;
+        Coordinate opposite = getFacingCoordinate(_start, startDir);
+        
+        retValues ret = new retValues();
+        if(_end.compare(n)){
+            //Found square when turning left.
+            ret.actions = new ArrayList<>(Collections.nCopies(1, World.A_TURN_LEFT));
+        }
+        else if(_end.compare(opposite)){
+            //Found square when turning right.
+            ret.actions = new ArrayList<>(Collections.nCopies(1, World.A_TURN_RIGHT));
+        }
+        else{
+            //Did not find right square when turning, must be behind us.
+            ret.actions = new ArrayList<>(Collections.nCopies(2, World.A_TURN_RIGHT));
+        }
+        //update new direction.
+        ret.currentDir = _playerDireciton;
+        for( String s : ret.actions){
+            if(s == "l"){
+                ret.currentDir--;
+                if(startDir < 0)
+                    startDir = 3; 
+            }
+            else{
+                ret.currentDir++;
+                if(startDir > 3)
+                    startDir = 0;
+            }
+        }
+        return ret;
+    }
+    
+    public Coordinate getFacingCoordinate(Coordinate _c, int _direction){
+        Coordinate n = new Coordinate(_c);
+        switch(_direction){
+            case World.DIR_DOWN:
+                n.y--;
+                break;
+            case World.DIR_LEFT:
+                n.x--;
+                break;
+            case World.DIR_RIGHT:
+                n.x++;
+                break;
+            case World.DIR_UP:
+                n.y++;
+                break;
+        }
+        return n;
     }
     
    public static Comparator<Node> DISTANCE = new Comparator<Node>() {
