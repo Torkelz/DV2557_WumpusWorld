@@ -28,10 +28,7 @@ public class Coordinate {
     }
     
     public boolean compare(Coordinate _c){
-        if(x == _c.x && y == _c.y)
-            return true;
-        else
-            return false;
+        return x == _c.x && y == _c.y;
     }
     @Override
     public int hashCode() {
@@ -41,12 +38,15 @@ public class Coordinate {
     //Compare only account numbers
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj){
             return true;
-        if (obj == null)
+        }
+        if (obj == null){
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()){
             return false;
+        }
         Coordinate other = (Coordinate) obj;
 
         return !(x != other.x || y != other.y);

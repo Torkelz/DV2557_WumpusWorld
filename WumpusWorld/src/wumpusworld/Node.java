@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Helper class to A*-algorithm.
  * @author Torkelz / Smurfa
  */
 public class Node {
@@ -20,23 +20,26 @@ public class Node {
     
     public Node(Coordinate _coordinate){
         this.coordinate = new Coordinate(_coordinate);
-        neighbours = new ArrayList<>();
-        g = Integer.MAX_VALUE;
-        f = 0;
+        this.neighbours = new ArrayList<>();
+        this.g = Integer.MAX_VALUE;
+        this.f = 0;
     }
 
     //Compare only account numbers
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj){
             return true;
-        if (obj == null)
+
+        }
+        if (obj == null){
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()){
             return false;
+        }
         Node other = (Node) obj;
-        if (coordinate.x != other.coordinate.x || coordinate.y != other.coordinate.y)
-            return false;
-        return true;
+        
+        return !(coordinate.x != other.coordinate.x || coordinate.y != other.coordinate.y);
     }
 }
