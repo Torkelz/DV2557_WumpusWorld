@@ -75,7 +75,7 @@ public class MyAgent implements Agent
         dangerMap.clear();
         
         
-        if(!foundWumpus){
+        if(!foundWumpus && world.wumpusAlive()){
             Coordinate ret = helper.determineWumpus(visited);
             if(!ret.compare(new Coordinate(-1, -1))){
                 foundWumpus = true;
@@ -130,9 +130,10 @@ public class MyAgent implements Agent
         Coordinate newC = helper.getFacingCoordinate(current, world.getDirection());
         
         if(safeNeighbours.isEmpty()){
-            if(foundWumpus){
+            if(foundWumpus && world.wumpusAlive()){
                 if(newC.compare(wumpusCoordinates)){
                     actionQueue.add(World.A_SHOOT);
+                    return;
                 }
                 
                 Coordinate closest = null;
