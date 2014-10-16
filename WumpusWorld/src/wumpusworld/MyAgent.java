@@ -207,5 +207,10 @@ public class MyAgent implements Agent
                 actionQueue.add(World.A_MOVE);
             }
         }
-    }
+        
+        if(!actionQueue.isEmpty()){
+            world.doAction(actionQueue.get(0));
+            actionQueue.remove(0);
+        }
+    }    
 }
