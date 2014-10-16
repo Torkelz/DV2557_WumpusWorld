@@ -7,22 +7,23 @@ import java.util.Map;
 import wumpusworld.HelperFunctions.ReturnValues;
 
 /**
- * Contans starting code for creating your own Wumpus World agent.
+ * Contains starting code for creating your own Wumpus World agent.
  * Currently the agent only make a random decision each turn.
  * 
- * @author Johan HagelbÃ¤ck
+ * @author Johan Hagelbäck feat. Torkelz / Smurfa
  */
 public class MyAgent implements Agent
 {    
-    private World world;
-    private List<Coordinate> visited = new ArrayList<>();
-    private List<Coordinate> visitedNeighbours = new ArrayList<>();
-    private Map<Coordinate, Integer> dangerMap = new HashMap<>();
-    private List<Coordinate> safeNeighbours = new ArrayList<>();
-    private List<String> actionQueue = new ArrayList<>();
+    private final List<Coordinate> visited = new ArrayList<>();
+    private final List<Coordinate> visitedNeighbours = new ArrayList<>();
+    private final List<Coordinate> safeNeighbours = new ArrayList<>();
+    private final List<String> actionQueue = new ArrayList<>();
+    private final Map<Coordinate, Integer> dangerMap = new HashMap<>();
+    private final HelperFunctions helper;
+    private final World world;
+
     private boolean foundWumpus = false;
     private Coordinate wumpusCoordinates;
-    private HelperFunctions helper;
     
     /**
      * Creates a new instance of your solver agent.
