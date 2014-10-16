@@ -62,15 +62,6 @@ public class HelperFunctions {
         return false;
     }
     
-    public boolean isVisited(Coordinate _c, List<Coordinate> _visited){
-        for (Coordinate v : _visited) {
-            if(_c.compare(v)){
-                return true;
-            }
-        }
-        return false;
-    }
-    
     public boolean isTurnLeftValid(Coordinate _current, int _dir){
         _dir--;        
         if(_dir < 0){

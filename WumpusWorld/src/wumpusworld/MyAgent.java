@@ -39,14 +39,14 @@ public class MyAgent implements Agent
     /**
      * Asks your solver agent to execute an action.
      */
+    @Override
     public void doAction()
     {
-        //Location of the player
         Coordinate current = new Coordinate(world.getPlayerX(), world.getPlayerY());
-        if(!helper.isVisited(current, visited)){
+        
+        if(!visited.contains(current)){
             visited.add(current);
         }
-        //Basic action:
         //Grab Gold if we can.
         if (world.hasGlitter(current.x, current.y))
         {
