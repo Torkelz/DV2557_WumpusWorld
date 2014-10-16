@@ -46,6 +46,12 @@ public class HelperFunctions {
     }
     
     public boolean safeBreeze(Coordinate _current){
+        List<Coordinate> neighbours = getSurroundingSquares(_current);
+        for (Coordinate n : neighbours){
+            if (world.isVisited(n.x, n.y) && world.hasPit(n.x, n.y)){
+                return true;
+            }
+        }
         return false;
     }
     
