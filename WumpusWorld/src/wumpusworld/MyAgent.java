@@ -114,6 +114,10 @@ public class MyAgent implements Agent
                             safeNeighbours.add(neighbour);
                         }
                     }
+                    //Has both breeze and stench. DO NOTHING, MUY IMPORTANTE!
+                    else if(!helper.isSafe(c)){ 
+
+                    }
                     //Empty square
                     else{ 
                         safeNeighbours.add(neighbour);
