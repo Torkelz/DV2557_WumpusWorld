@@ -17,7 +17,7 @@ import java.util.Map;
  * @author Torkelz
  */
 public class HelperFunctions {
-    private class retValues{
+    public class retValues{
         public List<String> actions;
         public int currentDir;
     }
@@ -248,7 +248,7 @@ public class HelperFunctions {
         return actions;
     }
     
-    private retValues turnTo(Coordinate _start, Coordinate _end, int _playerDireciton){
+    public retValues turnTo(Coordinate _start, Coordinate _end, int _playerDireciton){
         int startDir = _playerDireciton;
         
         startDir--;
@@ -256,6 +256,7 @@ public class HelperFunctions {
             startDir = 3;
         
         Coordinate n = getFacingCoordinate(_start, startDir);
+        startDir = _playerDireciton;
         startDir++;
         if(startDir > 3)
             startDir = 0;

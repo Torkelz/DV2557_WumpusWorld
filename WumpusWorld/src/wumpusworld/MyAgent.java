@@ -2,6 +2,7 @@ package wumpusworld;
 
 import java.util.ArrayList;
 import java.util.List;
+import wumpusworld.HelperFunctions.retValues;
 
 /**
  * Contans starting code for creating your own Wumpus World agent.
@@ -57,15 +58,12 @@ public class MyAgent implements Agent
         
         //
         if (!actionQueue.isEmpty()){
-            world.doAction(actionQueue.get(0));
+            String action = actionQueue.get(0);
+            world.doAction(action);
             actionQueue.remove(0);
+            System.out.println("ActionQueue launhced: " + action);
             return;
         }
-        
-        if(visited.size() > 4){
-            helper.goTo(new Coordinate(3,1), current, world.getDirection(), visited);
-        }
-        
         
         safeNeighbours.clear();
         visitedNeighbours.clear();
@@ -111,9 +109,73 @@ public class MyAgent implements Agent
                 }
             }
         }
-        
         //Get target coordinate.
         Coordinate newC = helper.getFacingCoordinate(current, world.getDirection());
+        
+        if(safeNeighbours.isEmpty()){
+            if(foundWumpus){
+                if(newC.compare(wumpusCoordinates)){
+                    actionQueue.add(World.A_SHOOT);
+                }
+                
+                Coordinate closest = null;
+                float distance = Float.MAX_VALUE;
+                for( Coordinate v : visited){
+                    if(world.hasStench(v.x, v.y)){
+                        float d = (float) Math.sqrt(Math.pow((v.x - current.x), 2) +Math.pow((v.y - current.y), 2));
+                        if(d < distance){
+                            distance = d;
+                            closest = v;
+                        }
+                    }
+                }
+                actionQueue.addAll(helper.goTo(closest, current, world.getDirection(), visited));
+                int estimatedDir = world.getDirection();
+                for(String s : actionQueue){
+                    if(s == "l"){
+                        estimatedDir--;
+                    }
+                    else if(s == "r"){
+                        estimatedDir++;
+                    }
+                    
+                    if(estimatedDir > 3){
+                        estimatedDir = 0;
+                    }
+                    if(estimatedDir < 0){
+                        estimatedDir = 3;
+                    }
+                }
+                
+                
+                retValues ret = helper.turnTo(closest, wumpusCoordinates, estimatedDir);
+                actionQueue.addAll(ret.actions);
+                return;
+            }
+        }
+        else{
+            Coordinate closest = null;
+            float distance = Float.MAX_VALUE;
+            for( Coordinate v : safeNeighbours){
+                float d = (float) Math.sqrt(Math.pow((v.x - current.x), 2) +Math.pow((v.y - current.y), 2));
+                if(d < distance){
+                    distance = d;
+                    closest = v;
+                }
+            }
+            List<Coordinate> safeAndVisited = new ArrayList<>();
+            safeAndVisited.addAll(visited);
+            safeAndVisited.addAll(safeNeighbours);
+            actionQueue.addAll(helper.goTo(closest, current, world.getDirection(), safeAndVisited));
+            if(actionQueue.isEmpty()){
+                actionQueue.add(World.A_MOVE);
+            }
+            return;
+        }
+        
+        
+        
+        
         
         if(helper.isSafe(current) || world.isVisited(newC.x, newC.y))
         {

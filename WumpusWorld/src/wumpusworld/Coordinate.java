@@ -35,7 +35,7 @@ public class Coordinate {
     }
     @Override
     public int hashCode() {
-        return x*10 + y;
+        return x * 10 + y;
     }
 
     //Compare only account numbers
