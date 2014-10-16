@@ -1,7 +1,9 @@
 package wumpusworld;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import wumpusworld.HelperFunctions.retValues;
 
 /**
@@ -15,6 +17,7 @@ public class MyAgent implements Agent
     private World world;
     private List<Coordinate> visited = new ArrayList<>();
     private List<Coordinate> visitedNeighbours = new ArrayList<>();
+    private Map<Coordinate, Integer> dangerMap = new HashMap<>();
     private List<Coordinate> safeNeighbours = new ArrayList<>();
     private List<String> actionQueue = new ArrayList<>();
     private boolean foundWumpus = false;
@@ -39,7 +42,9 @@ public class MyAgent implements Agent
     {
         //Location of the player
         Coordinate current = new Coordinate(world.getPlayerX(), world.getPlayerY());
-        
+        if(!helper.isVisited(current, visited)){
+            visited.add(current);
+        }
         //Basic action:
         //Grab Gold if we can.
         if (world.hasGlitter(current.x, current.y))
@@ -67,6 +72,9 @@ public class MyAgent implements Agent
         
         safeNeighbours.clear();
         visitedNeighbours.clear();
+        dangerMap.clear();
+        
+        
         if(!foundWumpus){
             Coordinate ret = helper.determineWumpus(visited);
             if(!ret.compare(new Coordinate(-1, -1))){
@@ -75,15 +83,24 @@ public class MyAgent implements Agent
             }
         }
         
-        if(!helper.isVisited(current, visited)){
-            visited.add(current);
-        }
+        
         for (Coordinate c : visited){
             List<Coordinate> neighbours = helper.getSurroundingSquares(c);
             for (Coordinate n : neighbours){
                 if (world.isUnknown(n.x, n.y) ){
                     if(!visitedNeighbours.contains(n)){
                         visitedNeighbours.add(n);
+                        dangerMap.put(n, 0);
+                    }
+                    if(visitedNeighbours.contains(n)){
+                        if(world.hasBreeze(c.x, c.y)){
+                            Integer value = dangerMap.get(n) + 1;
+                            dangerMap.put(n, value);
+                        }
+                        if(world.hasStench(c.x, c.y)){
+                            Integer value = dangerMap.get(n) + 2;
+                            dangerMap.put(n, value);
+                        }
                     }
                     
                     //Only stench
@@ -152,6 +169,27 @@ public class MyAgent implements Agent
                 actionQueue.addAll(ret.actions);
                 return;
             }
+            else{
+                Coordinate closest = null;
+                float distance = Float.MAX_VALUE;
+                int maxDanger = Integer.MAX_VALUE;
+                
+                for(Coordinate v : visitedNeighbours){
+                    float d = (float) Math.sqrt(Math.pow((v.x - current.x), 2) + Math.pow((v.y - current.y), 2));
+                    
+                    if(dangerMap.get(v) <= maxDanger && d < distance){
+                        maxDanger = dangerMap.get(v);
+                        distance = d;
+                        closest = v;
+                    }
+                    
+                }
+                List<Coordinate> safeAndVisited = new ArrayList<>();
+                safeAndVisited.addAll(visited);
+                safeAndVisited.add(closest);
+                actionQueue.addAll(helper.goTo(closest, current, world.getDirection(), safeAndVisited));
+                return;
+            }
         }
         else{
             Coordinate closest = null;
@@ -170,50 +208,6 @@ public class MyAgent implements Agent
             if(actionQueue.isEmpty()){
                 actionQueue.add(World.A_MOVE);
             }
-            return;
-        }
-        
-        
-        
-        
-        
-        if(helper.isSafe(current) || world.isVisited(newC.x, newC.y))
-        {
-            if(!world.isValidPosition(newC.x, newC.y)){
-                 if(helper.wall()){
-                    return;
-                 }
-            }
-            world.doAction(World.A_MOVE);
-            return;
-        }
-        else if(world.hasStench(current.x, current.y) || world.hasBreeze(current.x, current.y)){
-            
-            if(foundWumpus && !world.hasBreeze(current.x, current.y)){
-                //wumpus has been found and there's no breeze to worry about.
-                if(!newC.compare(wumpusCoordinates)){
-                    //Wumpus is not infront of us.
-                    world.doAction(World.A_MOVE);
-                    return;
-                }
-                else{
-                    //Wumpus is infront of us and no safe alternatives but shooting is left.
-                    if(safeNeighbours.isEmpty()){
-                        world.doAction(World.A_SHOOT);
-                        world.doAction(World.A_MOVE);
-                    }
-                }   
-            }
-            else{
-                //wumpus has not been found / there's a breeze
-                
-                //Do 180 turn.
-                world.doAction(World.A_TURN_LEFT);
-                world.doAction(World.A_TURN_LEFT);
-                return;
-            }
-        }
-        else{
             return;
         }
     }
