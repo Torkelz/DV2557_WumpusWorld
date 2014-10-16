@@ -280,13 +280,13 @@ public class HelperFunctions {
         for( String s : ret.actions){
             if(s == "l"){
                 ret.currentDir--;
-                if(startDir < 0)
-                    startDir = 3; 
+                if(ret.currentDir < 0)
+                    ret.currentDir = 3; 
             }
             else{
                 ret.currentDir++;
-                if(startDir > 3)
-                    startDir = 0;
+                if(ret.currentDir > 3)
+                    ret.currentDir = 0;
             }
         }
         return ret;
