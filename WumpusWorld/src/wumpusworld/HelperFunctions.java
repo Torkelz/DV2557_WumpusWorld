@@ -22,17 +22,14 @@ public class HelperFunctions {
         public int currentDir;
     }
     
-    private World world;
+    private final World world;
     
     public HelperFunctions(World _world){
         this.world = _world;
     }
     
     public boolean isSafe(Coordinate _current){
-        if(!world.hasBreeze(_current.x, _current.y) && !world.hasStench(_current.x, _current.y)){
-            return true;
-        }        
-        return false;
+        return !world.hasBreeze(_current.x, _current.y) && !world.hasStench(_current.x, _current.y);
     }
     
     /*
@@ -80,10 +77,7 @@ public class HelperFunctions {
             _dir = 3;
         }
         Coordinate n = getFacingCoordinate(_current, _dir);
-        if(world.isValidPosition(n.x, n.y)){
-            return true;
-        }
-        return false;
+        return world.isValidPosition(n.x, n.y);
     }
     
     public boolean isTurnRightValid(Coordinate _current, int _dir){
@@ -92,28 +86,7 @@ public class HelperFunctions {
             _dir = 0;
         }
         Coordinate n = getFacingCoordinate(_current, _dir);
-        if(world.isValidPosition(n.x, n.y)){
-            return true;
-        }
-        return false;
-    }
-    
-    /*
-    * Handles if the player is facing the wall, and makes the player turn away.
-    */
-    public boolean wall(){
-        Coordinate playerPosition = new Coordinate(world.getPlayerX(), world.getPlayerY());
-        Coordinate c = getFacingCoordinate(playerPosition, world.getDirection());
-        
-        if(!world.isValidPosition(c.x, c.y)){
-            if(isTurnRightValid(playerPosition, world.getDirection())){
-                world.doAction(World.A_TURN_RIGHT);
-                return true;
-            }
-            world.doAction(World.A_TURN_LEFT);
-            return true;
-        }
-        return false;
+        return world.isValidPosition(n.x, n.y);
     }
     
     /*
