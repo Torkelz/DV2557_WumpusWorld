@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import wumpusworld.HelperFunctions.retValues;
+import wumpusworld.HelperFunctions.ReturnValues;
 
 /**
  * Contans starting code for creating your own Wumpus World agent.
@@ -166,7 +166,7 @@ public class MyAgent implements Agent
                 }
                 
                 
-                retValues ret = helper.turnTo(closest, wumpusCoordinates, estimatedDir);
+                ReturnValues ret = helper.turnTo(closest, wumpusCoordinates, estimatedDir);
                 actionQueue.addAll(ret.actions);
                 return;
             }
