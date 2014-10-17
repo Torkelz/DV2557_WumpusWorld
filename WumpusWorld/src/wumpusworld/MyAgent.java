@@ -64,7 +64,6 @@ public class MyAgent implements Agent
             String action = actionQueue.get(0);
             world.doAction(action);
             actionQueue.remove(0);
-            System.out.println("ActionQueue launhced: " + action);
             return;
         }
         //Try to locate the wumpus.
